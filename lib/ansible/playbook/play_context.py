@@ -472,7 +472,18 @@ class PlayContext(Base):
             # set flags to use for the privilege escalation method, with various overrides
             flags = self.become_flags or getattr(self, '%s_flags' % self.become_method, '')
 
-            if self.become_method == 'sudo':
+            #suexec priv escalation
+            if self.become_method == 'suexec':
+
+                if self.become_pass:
+                    prompt = 'Password:'
+                    becomecmd = '%s %s -u %s %s' % (exe, flags, self.become_user, command)
+                # TODO confirm if passwordless escalation is possibleß
+                else:
+                    becomecmd = '%s %s -u %s %s' % (exe, flags, self.become_user, command)
+
+            elif self.become_method == 'sudo':
+
                 # If we have a password, we run sudo with a randomly-generated
                 # prompt set using -p. Otherwise we run it with default -n, which makes
                 # it fail if it would have prompted for a password.
